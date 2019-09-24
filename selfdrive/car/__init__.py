@@ -2,7 +2,7 @@
 from common.numpy_fast import clip
 
 # kg of standard extra cargo to count for drive, gas, etc...
-STD_CARGO_KG = 136.
+STD_CARGO_KG = 220.
 
 # FIXME: hardcoding honda civic 2016 touring params so they can be used to
 # scale unknown params for other cars
@@ -31,7 +31,7 @@ def scale_tire_stiffness(mass, wheelbase, center_to_front, tire_stiffness_factor
                         (center_to_front / wheelbase) / (CivicParams.CENTER_TO_FRONT / CivicParams.WHEELBASE)
 
   return tire_stiffness_front, tire_stiffness_rear
-    
+
 def dbc_dict(pt_dbc, radar_dbc, chassis_dbc=None):
   return {'pt': pt_dbc, 'radar': radar_dbc, 'chassis': chassis_dbc}
 
