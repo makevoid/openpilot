@@ -13,14 +13,14 @@ VisualAlert = car.CarControl.HUDControl.VisualAlert
 
 # Accel limits
 ACCEL_HYST_GAP = 0.02  # don't change accel command for small oscilalitons within this value
-ACCEL_MAX = 1.8  # 1.8 m/s2
+ACCEL_MAX = 1.05  # m/s2 ( 1.5 is default, even if I like it at around 1.8, ~1.0 is for wifey-optimized chill rides :) )
 ACCEL_MIN = -3.0 # 3   m/s2
 ACCEL_SCALE = max(ACCEL_MAX, -ACCEL_MIN)
 
 # Steer torque limits
 class SteerLimitParams:
   STEER_MAX = 1500
-  STEER_DELTA_UP = 14       # 1.5s time to peak torque
+  STEER_DELTA_UP = 16       # when set to 10 it will reach peak torque in 1.5s
   STEER_DELTA_DOWN = 45     # always lower than 45 otherwise the Rav4 faults (Prius seems ok with 50)
   STEER_ERROR_MAX = 420     # max delta between torque cmd and torque motor
 
