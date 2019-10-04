@@ -4,12 +4,13 @@ from selfdrive.controls.lib.drive_helpers import create_event, EventTypes as ET
 from common.filter_simple import FirstOrderFilter
 from common.stat_live import RunningStatFilter
 
-_AWARENESS_TIME = 100.  # 1.6 minutes limit without user touching steering wheels make the car enter a terminal status
-_AWARENESS_PRE_TIME_TILL_TERMINAL = 25.  # a first alert is issued 25s before expiration
-_AWARENESS_PROMPT_TIME_TILL_TERMINAL = 15.  # a second alert is issued 15s before start decelerating the car
-_DISTRACTED_TIME = 11.
-_DISTRACTED_PRE_TIME_TILL_TERMINAL = 8.
-_DISTRACTED_PROMPT_TIME_TILL_TERMINAL = 6.
+# note: these values are doubled in my fork, if you plan to do a lot of highway driving, please consider reverting them to the original values
+_AWARENESS_TIME = 200.  # 3.3 minutes limit without user touching steering wheels make the car enter a terminal status
+_AWARENESS_PRE_TIME_TILL_TERMINAL = 50.  # a first alert is issued 25s before expiration
+_AWARENESS_PROMPT_TIME_TILL_TERMINAL = 30.  # a second alert is issued 15s before start decelerating the car
+_DISTRACTED_TIME = 22.
+_DISTRACTED_PRE_TIME_TILL_TERMINAL = 16.
+_DISTRACTED_PROMPT_TIME_TILL_TERMINAL = 12.
 
 _FACE_THRESHOLD = 0.4
 _EYE_THRESHOLD = 0.4
