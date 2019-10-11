@@ -1,5 +1,5 @@
 from cereal import car
-from common.numpy_fast import clip, interp, maximum
+from common.numpy_fast import clip, interp
 from selfdrive.car import apply_toyota_steer_torque_limits
 from selfdrive.car import create_gas_command
 from selfdrive.car.toyota.toyotacan import make_can_msg, create_video_target,\
@@ -136,7 +136,7 @@ class CarController():
 
     # for wifey-optimized chill rides, limit positive accel to ACCEL_MAX
     if apply_accel > 0:
-      apply_accel = maximum(apply_accel * ACCEL_SCALE, ACCEL_MAX)
+      apply_accel = max(apply_accel * ACCEL_SCALE, ACCEL_MAX)
 
     # steer torque
     apply_steer = int(round(actuators.steer * SteerLimitParams.STEER_MAX))
