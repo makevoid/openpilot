@@ -136,7 +136,7 @@ class CarController():
 
     # for wifey-optimized chill rides, limit positive accel to ACCEL_MAX
     if apply_accel > 0:
-      apply_accel = max(apply_accel * ACCEL_SCALE, ACCEL_MAX)
+      apply_accel = min(apply_accel * ACCEL_SCALE, ACCEL_MAX)
 
     # steer torque
     apply_steer = int(round(actuators.steer * SteerLimitParams.STEER_MAX))
