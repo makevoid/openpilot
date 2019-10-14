@@ -213,7 +213,7 @@ class CarController():
 
     # accel cmd comes from DSU, but we can spam can to cancel the system even if we are using lat only control
     if (frame % 3 == 0 and ECU.DSU in self.fake_ecus) or (pcm_cancel_cmd and ECU.CAM in self.fake_ecus):
-      lead = lead or CS.v_ego < 12.    # at low speed we always assume the lead is present do ACC can be engaged
+      lead = lead or CS.v_ego < 12.    # at low speed we always assume the lead is present so ACC can be engaged
 
       # Lexus IS uses a different cancellation message
       if pcm_cancel_cmd and CS.CP.carFingerprint == CAR.LEXUS_IS:
