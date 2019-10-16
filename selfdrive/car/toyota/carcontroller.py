@@ -140,7 +140,8 @@ class CarController():
     else:
       # use softer acceleration by default
       accel_max = ACCEL_MAX
-      accel_max = ACCEL_MAX_LOWSPEED if CS.v_ego < 6. # use stronger acceleration at low speeds otherwise drivers behind will get angry on stop & go traffic :D
+      if CS.v_ego < 6.:
+        accel_max = ACCEL_MAX_LOWSPEED 
       apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, accel_max)
 
     # steer torque
