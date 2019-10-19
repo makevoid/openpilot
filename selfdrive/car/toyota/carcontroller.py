@@ -16,7 +16,7 @@ ACCEL_HYST_GAP = 0.02  # don't change accel command for small oscilalitons withi
 ACCEL_MAX = 0.65 # m/s2 ( 1.5 is default, even if I like it at around 1.8, looking for a wifey-optimized chill rides :) )
 ACCEL_MIN = -3.0 # 3   m/s2
 ACCEL_SCALE = max(ACCEL_MAX, -ACCEL_MIN)
-ACCEL_MAX_LOWSPEED = 1.3 # m/s
+ACCEL_MAX_LOWSPEED = 1.6 # m/s
 
 # Steer torque limits
 class SteerLimitParams:
@@ -140,8 +140,8 @@ class CarController():
     else:
       # use softer acceleration by default
       accel_max = ACCEL_MAX
-      if CS.v_ego < 6.:
-        accel_max = ACCEL_MAX_LOWSPEED 
+      if CS.v_ego < 12.:
+        accel_max = ACCEL_MAX_LOWSPEED
       apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, accel_max)
 
     # steer torque
