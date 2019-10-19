@@ -72,8 +72,11 @@ def get_can_parser(CP):
   if CP.carFingerprint in NO_DSU_CAR:
     signals += [("STEER_ANGLE", "STEER_TORQUE_SENSOR", 0)]
 
-  if CP.carFingerprint == CAR.PRIUS:
+  # fingerprint_matches = CP.carFingerprint == CAR.PRIUS
+  fingerprint_matches = True
+  if fingerprint_matches:
     signals += [("STATE", "AUTOPARK_STATUS", 0)]
+    signals += [("ZORRO_STEER", "SECONDARY_STEER_ANGLE", 0)]
 
   # add gas interceptor reading if we are using it
   if CP.enableGasInterceptor:
@@ -152,14 +155,24 @@ class CarState():
     self.a_ego = float(v_ego_x[1])
     self.standstill = not v_wheel > 0.001
 
+    # fingerprint_matches_nodsu = self.CP.carFingerprint in NO_DSU_CAR
+    fingerprint_matches_nodsu = True
+
     if self.CP.carFingerprint in TSS2_CAR:
       self.angle_steers = cp.vl["STEER_TORQUE_SENSOR"]['STEER_ANGLE']
-    elif self.CP.carFingerprint in NO_DSU_CAR:
+    elif fingerprint_matches_nodsu:
       # cp.vl["STEER_TORQUE_SENSOR"]['STEER_ANGLE'] is zeroed to where the steering angle is at start.
-      # need to apply an offset as soon as the steering angle measurements are both received
-      self.angle_steers = cp.vl["STEER_TORQUE_SENSOR"]['STEER_ANGLE'] - self.angle_offset
+      # need to apply an offset as soon as the steering angle measurements are both received (note: not on zss)
+
+      # change from builtin angle sensor to ZSS
+      # steer_angle = cp.vl["STEER_TORQUE_SENSOR"]['STEER_ANGLE'] # default sensor
+      steer_angle = cp.vl["SECONDARY_STEER_ANGLE"]['ZORRO_STEER']
+      self.angle_steers = steer_angle - self.angle_offset
+
       angle_wheel = cp.vl["STEER_ANGLE_SENSOR"]['STEER_ANGLE'] + cp.vl["STEER_ANGLE_SENSOR"]['STEER_FRACTION']
-      if abs(angle_wheel) > 1e-3 and abs(self.angle_steers) > 1e-3 and not self.init_angle_offset:
+      reset_angle_offset_no_zss = abs(angle_wheel) > 1e-3 and abs(self.angle_steers) > 1e-3
+      # if reset_angle_offset_no_zss and not self.init_angle_offset: # to restore non-zorro steer
+      if not self.init_angle_offset:
         self.init_angle_offset = True
         self.angle_offset = self.angle_steers - angle_wheel
     else:

@@ -12,6 +12,9 @@ BO_ 359 STEERING_IPAS_COMMA: 8 IPAS
  SG_ SET_ME_X00 : 55|8@0+ (1,0) [0|255] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 35 SECONDARY_STEER_ANGLE: 8 XXX
+ SG_ ZORRO_STEER : 7|24@0- (0.004901594652,0) [-500|500] "" XXX
+
 CM BO_ STEERING_IPAS_COMMA "Copy of msg 614 so we can do angle control while the Park Assist ECU is connected (Panda spoofs 614 with 359 on connector J70). Note that addresses 0x266 and 0x167 are checksum-invariant";
 
  BO_ 512 GAS_COMMAND: 6 EON
@@ -379,7 +382,7 @@ BO_ 608 STEER_TORQUE_SENSOR: 8 XXX
  SG_ STEER_TORQUE_DRIVER : 15|16@0- (1,0) [-32768|32767] "" XXX
  SG_ STEER_OVERRIDE : 0|1@0+ (1,0) [0|1] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
- SG_ STEER_ANGLE : 31|16@0- (0.0573,0) [-500|500] "" XXX 
+ SG_ STEER_ANGLE : 31|16@0- (0.0573,0) [-500|500] "" XXX
 
 BO_ 610 EPS_STATUS: 8 EPS
  SG_ IPAS_STATE : 3|4@0+ (1,0) [0|15] "" XXX

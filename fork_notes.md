@@ -6,4 +6,4 @@ commits tested few days after committed, if you try the branch, checkout commits
 
 LICENSE of my changes: MIT
 
-DISCLAIMER: trying the code in my branch is at your own risk, I'm not liable if you try it and it fails
+DISCLAIMER: trying the code in my branch is at your own risk, I'm not liable if you try it and it fails. 
