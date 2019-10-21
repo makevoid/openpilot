@@ -72,9 +72,7 @@ def get_can_parser(CP):
   if CP.carFingerprint in NO_DSU_CAR:
     signals += [("STEER_ANGLE", "STEER_TORQUE_SENSOR", 0)]
 
-  # fingerprint_matches = CP.carFingerprint == CAR.PRIUS
-  fingerprint_matches = True
-  if fingerprint_matches:
+  if CP.carFingerprint == CAR.PRIUS:
     signals += [("STATE", "AUTOPARK_STATUS", 0)]
     signals += [("ZORRO_STEER", "SECONDARY_STEER_ANGLE", 0)]
 
