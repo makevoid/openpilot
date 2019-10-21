@@ -6,6 +6,9 @@ from selfdrive.can.parser import CANParser
 from selfdrive.config import Conversions as CV
 from selfdrive.car.toyota.values import CAR, DBC, STEER_THRESHOLD, TSS2_CAR, NO_DSU_CAR
 
+CONFIG_ZORRO_SENSOR_ENABLED = True
+# CONFIG_ZORRO_SENSOR_ENABLED = False # disables zss, uncomment and reboot if you are running with no ZSS / the ethernet cable unplugged
+
 GearShifter = car.CarState.GearShifter
 
 def parse_gear_shifter(gear, vals):
@@ -153,18 +156,17 @@ class CarState():
     self.a_ego = float(v_ego_x[1])
     self.standstill = not v_wheel > 0.001
 
-    # fingerprint_matches_nodsu = self.CP.carFingerprint in NO_DSU_CAR
-    fingerprint_matches_nodsu = True
-
     if self.CP.carFingerprint in TSS2_CAR:
       self.angle_steers = cp.vl["STEER_TORQUE_SENSOR"]['STEER_ANGLE']
-    elif fingerprint_matches_nodsu:
+    elif self.CP.carFingerprint in NO_DSU_CAR:
       # cp.vl["STEER_TORQUE_SENSOR"]['STEER_ANGLE'] is zeroed to where the steering angle is at start.
       # need to apply an offset as soon as the steering angle measurements are both received (note: not on zss)
 
-      # change from builtin angle sensor to ZSS
-      # steer_angle = cp.vl["STEER_TORQUE_SENSOR"]['STEER_ANGLE'] # default sensor
-      steer_angle = cp.vl["SECONDARY_STEER_ANGLE"]['ZORRO_STEER']
+      steer_angle = cp.vl["STEER_TORQUE_SENSOR"]['STEER_ANGLE'] # stock sensor value
+      # change from builtin angle sensor to ZSS (you can disable this behaviour by modifying the config at the top of this file)
+      if CONFIG_ZORRO_SENSOR_ENABLED:
+        steer_angle = cp.vl["SECONDARY_STEER_ANGLE"]['ZORRO_STEER']
+
       self.angle_steers = steer_angle - self.angle_offset
 
       angle_wheel = cp.vl["STEER_ANGLE_SENSOR"]['STEER_ANGLE'] + cp.vl["STEER_ANGLE_SENSOR"]['STEER_FRACTION']
