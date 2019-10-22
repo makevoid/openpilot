@@ -68,9 +68,9 @@ class CarInterface(CarInterfaceBase):
       ret.mass = 3045. * CV.LB_TO_KG + STD_CARGO_KG
 
       ret.lateralTuning.init('indi')
-      ret.lateralTuning.indi.innerLoopGain = 4.0
-      ret.lateralTuning.indi.outerLoopGain = 3.0
-      ret.lateralTuning.indi.timeConstant = 1.0
+      ret.lateralTuning.indi.innerLoopGain = 4.0 # increasing this increases max steering - tried 5.0 and it's quite amazing - if I manage to smoothen 4 I should try to bump this to 5
+      ret.lateralTuning.indi.outerLoopGain = 3.0 # decreasing this increases jittering, overcorrection, I should try to use 3.5 or go the other way, like 1.5
+      ret.lateralTuning.indi.timeConstant = 1.0 # I should try both
       ret.lateralTuning.indi.actuatorEffectiveness = 1.0
 
       # TODO: Determine if this is better than INDI
