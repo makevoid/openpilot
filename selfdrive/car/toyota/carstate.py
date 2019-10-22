@@ -170,13 +170,16 @@ class CarState():
       self.angle_steers = steer_angle - self.angle_offset
 
       angle_wheel = cp.vl["STEER_ANGLE_SENSOR"]['STEER_ANGLE'] + cp.vl["STEER_ANGLE_SENSOR"]['STEER_FRACTION']
-      reset_angle_offset_no_zss = abs(angle_wheel) > 1e-3 and abs(self.angle_steers) > 1e-3
-      # if reset_angle_offset_no_zss and not self.init_angle_offset: # to restore non-zorro steer
-      if not self.init_angle_offset:
+
+      steer_angle_in_range = abs(angle_wheel) > 1e-3 and abs(self.angle_steers) > 1e-3
+      if CONFIG_ZORRO_SENSOR_ENABLED:
+        steer_angle_in_range = True
+      if init_angle_offset_needed and not self.init_angle_offset:
         self.init_angle_offset = True
         self.angle_offset = self.angle_steers - angle_wheel
     else:
       self.angle_steers = cp.vl["STEER_ANGLE_SENSOR"]['STEER_ANGLE'] + cp.vl["STEER_ANGLE_SENSOR"]['STEER_FRACTION']
+
     self.angle_steers_rate = cp.vl["STEER_ANGLE_SENSOR"]['STEER_RATE']
     can_gear = int(cp.vl["GEAR_PACKET"]['GEAR'])
     self.gear_shifter = parse_gear_shifter(can_gear, self.shifter_values)
