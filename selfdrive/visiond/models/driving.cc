@@ -123,6 +123,14 @@ ModelData model_eval_frame(ModelState* s, cl_command_queue q,
   poly_fit(model.left_lane.points, model.left_lane.stds, model.left_lane.poly);
   poly_fit(model.right_lane.points, model.right_lane.stds, model.right_lane.poly);
 
+  //BB force fit the left and right poly through the first real point (from tesla fork https://github.com/BogGyver/openpilot)
+  //if p(x) = a * x^3 + b * x^2 + c^x + d
+  // p(0) = d = points[0]
+  // so d = points[0]
+  model.left_lane.poly[3] = model.left_lane.points[0];
+  model.right_lane.poly[3] = model.right_lane.points[0];
+  model.path.poly[3] = model.path.points[0];
+
   const double max_dist = 140.0;
   const double max_rel_vel = 10.0;
   // Every output distribution from the MDN includes the probabilties
