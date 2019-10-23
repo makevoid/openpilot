@@ -26,7 +26,6 @@ ButtonType = car.CarState.ButtonEvent.Type
 GearShifter = car.CarState.GearShifter
 
 
-PID_
 
 class CarInterface(CarInterfaceBase):
   def __init__(self, CP, CarController):
