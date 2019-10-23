@@ -9,8 +9,24 @@ from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness,
 from selfdrive.swaglog import cloudlog
 from selfdrive.car.interfaces import CarInterfaceBase
 
+# ----
+# Tuning
+
+LATERAL_TUNING = "PID"
+PID_P = 0.1
+PID_I = 0.05
+PID_D = 0.00003
+
+# LATERAL_TUNING = "INDI"
+# ...
+
+# ----
+
 ButtonType = car.CarState.ButtonEvent.Type
 GearShifter = car.CarState.GearShifter
+
+
+PID_
 
 class CarInterface(CarInterfaceBase):
   def __init__(self, CP, CarController):
@@ -67,11 +83,18 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.6371   # hand-tune
       ret.mass = 3045. * CV.LB_TO_KG + STD_CARGO_KG
 
-      ret.lateralTuning.init('indi')
-      ret.lateralTuning.indi.innerLoopGain = 4.0 # increasing this increases max steering - tried 5.0 and it's quite amazing - if I manage to smoothen 4 I should try to bump this to 5
-      ret.lateralTuning.indi.outerLoopGain = 3.0 # decreasing this increases jittering, overcorrection, I should try to use 3.5 or go the other way, like 1.5
-      ret.lateralTuning.indi.timeConstant = 1.0 # I should try both
-      ret.lateralTuning.indi.actuatorEffectiveness = 1.0
+      if LATERAL_TUNING == "PID":
+          ret.lateralTuning.init('pid')
+          ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
+          ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[PID_P], [PID_I]] # tried 0.2 as the corolla has but that was a bit too much, this is chiller, but ideally I would like to go back to 0.2
+          ret.lateralTuning.pid.kf = PID_D # I believe kf is D
+
+      if LATERAL_TUNING == "INDI":
+          ret.lateralTuning.init('indi')
+          ret.lateralTuning.indi.innerLoopGain = 4.0
+          ret.lateralTuning.indi.outerLoopGain = 3.0
+          ret.lateralTuning.indi.timeConstant = 1.0
+          ret.lateralTuning.indi.actuatorEffectiveness = 1.0
 
       # TODO: Determine if this is better than INDI
       # ret.lateralTuning.init('lqr')
