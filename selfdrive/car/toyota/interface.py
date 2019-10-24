@@ -13,8 +13,8 @@ from selfdrive.car.interfaces import CarInterfaceBase
 # Tuning
 
 LATERAL_TUNING = "PID"
-PID_P = 0.22
-PID_I = 0.09 
+PID_P = 0.25
+PID_I = 0.08
 PID_D = 0.00003
 
 #LATERAL_TUNING = "INDI"
