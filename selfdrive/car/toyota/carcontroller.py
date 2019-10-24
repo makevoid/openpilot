@@ -23,7 +23,7 @@ class SteerLimitParams:
   STEER_MAX = 1500
   STEER_DELTA_UP = 16       # when set to 10 it will reach peak torque in 1.5s
   STEER_DELTA_DOWN = 45     # always lower than 45 otherwise the Rav4 faults (Prius seems ok with 50)
-  STEER_ERROR_MAX = 420     # max delta between torque cmd and torque motor
+  STEER_ERROR_MAX = 450     # max delta between torque cmd and torque motor
 
 # Steer angle limits (tested at the Crows Landing track and considered ok)
 ANGLE_MAX_BP = [0., 5.]
