@@ -126,6 +126,8 @@ ModelData model_eval_frame(ModelState* s, cl_command_queue q,
   //BB force fit the left and right poly through the first real point (from tesla fork https://github.com/BogGyver/openpilot)
   //if p(x) = a * x^3 + b * x^2 + c^x + d
   // so d = points[x0]-a * x0 ^ 3 - b * x0 ^ 2 - c * x0
+  //
+  // tested: much better straights but a lit worse on curves, overall I prefer it!
   poly_fix(model.left_lane.stds[0], model.left_lane.points[0], model.left_lane.poly);
   poly_fix(model.right_lane.stds[0], model.right_lane.points[0], model.right_lane.poly);
   poly_fix(model.path.stds[0], model.path.points[0], model.path.poly);
