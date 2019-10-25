@@ -15,9 +15,14 @@ from selfdrive.car.interfaces import CarInterfaceBase
 LATERAL_TUNING = "PID"
 PID_P = 0.25
 PID_I = 0.08
-PID_D = 0.00003
+PID_F = 0.00003
 
 #LATERAL_TUNING = "INDI"
+INDI_INNER  = 4.0
+INDI_OUTER  = 3.0
+INDI_TIME   = 1.0
+INDI_ACT    = 1.0
+
 # ...
 
 # ----
@@ -86,14 +91,14 @@ class CarInterface(CarInterfaceBase):
           ret.lateralTuning.init('pid')
           ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP = [[0.], [0.]]
           ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[PID_P], [PID_I]] # tried 0.2 as the corolla has but that was a bit too much, this is chiller, but ideally I would like to go back to 0.2
-          ret.lateralTuning.pid.kf = PID_D # I believe kf is D
+          ret.lateralTuning.pid.kf = PID_F # feedforward gain
 
       if LATERAL_TUNING == "INDI":
           ret.lateralTuning.init('indi')
-          ret.lateralTuning.indi.innerLoopGain = 4.0
-          ret.lateralTuning.indi.outerLoopGain = 3.0
-          ret.lateralTuning.indi.timeConstant = 1.0
-          ret.lateralTuning.indi.actuatorEffectiveness = 1.0
+          ret.lateralTuning.indi.innerLoopGain  = INDI_INNER
+          ret.lateralTuning.indi.outerLoopGain  = INDI_OUTER
+          ret.lateralTuning.indi.timeConstant   = INDI_TIME
+          ret.lateralTuning.indi.actuatorEffectiveness = INDI_ACT
 
       # TODO: Determine if this is better than INDI
       # ret.lateralTuning.init('lqr')
