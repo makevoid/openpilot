@@ -1,10 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import zmq
 from logentries import LogentriesHandler
-from selfdrive.services import service_list
-import selfdrive.messaging as messaging
+import cereal.messaging as messaging
 
-def main(gctx=None):
+def main():
   # setup logentries. we forward log messages to it
   le_token = "e8549616-0798-4d7e-a2ca-2513ae81fa17"
   le_handler = LogentriesHandler(le_token, use_tls=False, verbose=False)
@@ -16,10 +15,11 @@ def main(gctx=None):
   sock.bind("ipc:///tmp/logmessage")
 
   # and we publish them
-  pub_sock = messaging.pub_sock(service_list['logMessage'].port)
+  pub_sock = messaging.pub_sock('logMessage')
 
   while True:
-    dat = ''.join(sock.recv_multipart())
+    dat = b''.join(sock.recv_multipart())
+    dat = dat.decode('utf8')
 
     # print "RECV", repr(dat)
 
