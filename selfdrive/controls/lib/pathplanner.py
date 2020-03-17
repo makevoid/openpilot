@@ -1,5 +1,7 @@
 import os
 import math
+import numpy as np
+from common.numpy_fast import clip
 from common.realtime import sec_since_boot, DT_MDL
 from selfdrive.swaglog import cloudlog
 from selfdrive.controls.lib.lateral_mpc import libmpc_py
@@ -9,6 +11,8 @@ from selfdrive.config import Conversions as CV
 from common.params import Params
 import cereal.messaging as messaging
 from cereal import log
+import os.path
+import json
 
 LaneChangeState = log.PathPlan.LaneChangeState
 LaneChangeDirection = log.PathPlan.LaneChangeDirection
@@ -55,6 +59,12 @@ class PathPlanner():
 
     self.setup_mpc()
     self.solution_invalid_cnt = 0
+    self.frame = 0
+    if os.path.exists('/data/curvature.json'):
+        with open("/data/curvature.json", "r") as f:
+            self.curvature_offset_i = json.load(f)	
+    else:
+        self.curvature_offset_i = 0.0
     self.lane_change_enabled = Params().get('LaneChangeEnabled') == b'1'
     self.lane_change_state = LaneChangeState.off
     self.lane_change_direction = LaneChangeDirection.none
@@ -88,7 +98,7 @@ class PathPlanner():
     # Run MPC
     self.angle_steers_des_prev = self.angle_steers_des_mpc
     VM.update_params(sm['liveParameters'].stiffnessFactor, sm['liveParameters'].steerRatio)
-    curvature_factor = VM.curvature_factor(v_ego)
+    curvature_factor = VM.curvature_factor(v_ego) + self.curvature_offset_i
 
     self.LP.parse_model(sm['model'])
 
@@ -159,6 +169,20 @@ class PathPlanner():
       self.libmpc.init_weights(MPC_COST_LAT.PATH, MPC_COST_LAT.LANE, MPC_COST_LAT.HEADING, self.steer_rate_cost)
 
     self.LP.update_d_poly(v_ego)
+
+    if active and angle_steers - angle_offset > 0.5:
+      self.curvature_offset_i -= self.LP.d_poly[3] / 12000
+      #self.LP.d_poly[3] += self.curvature_offset_i
+    elif active and angle_steers - angle_offset < -0.5:
+      self.curvature_offset_i += self.LP.d_poly[3] / 12000
+
+    self.curvature_offset_i = clip(self.curvature_offset_i, -0.3, 0.3)
+    self.frame += 1
+    if self.frame == 12000: #every 2 mins
+      with open("/data/curvature.json", "w") as f:
+          json.dump(self.curvature_offset_i, f)
+      os.chmod("/data/curvature.json", 0o777)
+      self.frame = 0
 
     # account for actuation delay
     self.cur_state = calc_states_after_delay(self.cur_state, v_ego, angle_steers - angle_offset, curvature_factor, VM.sR, CP.steerActuatorDelay)
