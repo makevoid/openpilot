@@ -2,7 +2,7 @@
 from common.numpy_fast import clip
 
 # kg of standard extra cargo to count for drive, gas, etc...
-STD_CARGO_KG = 136.
+STD_CARGO_KG = 220.
 
 def gen_empty_fingerprint():
   return {i: {} for i in range(0, 4)}
@@ -128,4 +128,3 @@ def is_ecu_disconnected(fingerprint, fingerprint_list, ecu_fingerprint, car, ecu
 
 def make_can_msg(addr, dat, bus):
   return [addr, 0, dat, bus]
-
