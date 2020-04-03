@@ -296,10 +296,10 @@ class CarInterface(CarInterfaceBase):
 
     # limit min speed to 20mph
     # note: setting min speed, 28mph will result in speed being limited to 20mph, this is to allow city driving, this means that setting 28mph will be not possible anymore, only 29mph or above, if you set 28mph the car will do max 20mph
-    speed = self.CS.v_cruise_pcm * CV.KPH_TO_MS
-    if speed < (46 * CV.KPH_TO_MS): # ~28mph
-      speed = 32 * CV.KPH_TO_MS # ~20mph
-    ret.cruiseState.speed = speed
+    # speed = self.CS.v_cruise_pcm * CV.KPH_TO_MS
+    # if speed < (46 * CV.KPH_TO_MS): # ~28mph
+    #   speed = 32 * CV.KPH_TO_MS # ~20mph
+    # ret.cruiseState.speed = speed
 
     # events
     events = self.create_common_events(ret)
