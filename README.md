@@ -1,10 +1,6 @@
 #### This Fork
 
-This is an unofficial fork, please don't use as it is and don't recommend it to anyone as this fork has driver monitoring timeouts increased. I don't do much highway driving so for me it's good but these are not good defaults! (especially from someone not familiar with Openpilot!)
-
-If you want to use this fork or recommend it to other people please extract just the bits you need or revert the changes to the driver monitoring timeouts so that it has the same level of safety as Comma's version.
-
-Thanks for understanding.
+This is an unofficial fork, please don't use the code present in my fork diffs, I recommend you read it and understand it before thinking of trying it. This code is for illustration purposes only
 
 ### This fork main changes:
 

@@ -11,21 +11,12 @@ from common.stat_live import RunningStatFilter
 #  We recommend that you do not change these numbers from the defaults.
 # ******************************************************************************************
 
-# _AWARENESS_TIME = 70.  # one minute limit without user touching steering wheels make the car enter a terminal status
-# _AWARENESS_PRE_TIME_TILL_TERMINAL = 15.  # a first alert is issued 25s before expiration
-# _AWARENESS_PROMPT_TIME_TILL_TERMINAL = 6.  # a second alert is issued 15s before start decelerating the car
-# _DISTRACTED_TIME = 11.
-# _DISTRACTED_PRE_TIME_TILL_TERMINAL = 8.
-# _DISTRACTED_PROMPT_TIME_TILL_TERMINAL = 6.
-
-# note: these values are doubled in my fork, if you plan to do a lot of highway driving, please consider reverting them to the original values
-
-_AWARENESS_TIME = 200.  # 3.3 minutes limit without user touching steering wheels make the car enter a terminal status
-_AWARENESS_PRE_TIME_TILL_TERMINAL = 50.  # a first alert is issued 50s before expiration
-_AWARENESS_PROMPT_TIME_TILL_TERMINAL = 30.  # a second alert is issued 30s before start decelerating the car
-_DISTRACTED_TIME = 22.
-_DISTRACTED_PRE_TIME_TILL_TERMINAL = 16.
-_DISTRACTED_PROMPT_TIME_TILL_TERMINAL = 12.
+_AWARENESS_TIME = 70.  # one minute limit without user touching steering wheels make the car enter a terminal status
+_AWARENESS_PRE_TIME_TILL_TERMINAL = 15.  # a first alert is issued 25s before expiration
+_AWARENESS_PROMPT_TIME_TILL_TERMINAL = 6.  # a second alert is issued 15s before start decelerating the car
+_DISTRACTED_TIME = 11.
+_DISTRACTED_PRE_TIME_TILL_TERMINAL = 8.
+_DISTRACTED_PROMPT_TIME_TILL_TERMINAL = 6.
 
 _FACE_THRESHOLD = 0.4
 _EYE_THRESHOLD = 0.6
