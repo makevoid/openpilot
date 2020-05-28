@@ -8,10 +8,10 @@ from panda.tests.safety.common import CANPackerPanda, make_msg, UNSAFE_MODE
 
 # decrease max acceleration for an even chillier driving experience (city driving)
 
-MAX_ACCEL = 1.2 # original: 15
+MAX_ACCEL = 1.5
 MIN_ACCEL = -3.0
 
-ISO_MAX_ACCEL = 1.5 # original: 2.0
+ISO_MAX_ACCEL = 2.0
 ISO_MIN_ACCEL = -3.5
 
 class TestToyotaSafety(common.PandaSafetyTest, common.InterceptorSafetyTest, \
