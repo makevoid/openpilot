@@ -62,7 +62,7 @@ class PathPlanner():
     self.frame = 0
     if os.path.exists('/data/curvature.json'):
         with open("/data/curvature.json", "r") as f:
-            self.curvature_offset_i = json.load(f)	
+            self.curvature_offset_i = json.load(f)
     else:
         self.curvature_offset_i = 0.0
     self.lane_change_enabled = Params().get('LaneChangeEnabled') == b'1'
@@ -97,8 +97,13 @@ class PathPlanner():
 
     # Run MPC
     self.angle_steers_des_prev = self.angle_steers_des_mpc
-    VM.update_params(sm['liveParameters'].stiffnessFactor, sm['liveParameters'].steerRatio)
-    curvature_factor = VM.curvature_factor(v_ego) + self.curvature_offset_i
+
+    # Update vehicle model
+    x = max(sm['liveParameters'].stiffnessFactor, 0.1)
+    sr = max(sm['liveParameters'].steerRatio, 0.1)
+    VM.update_params(x, sr)
+
+    curvature_factor = VM.curvature_factor(v_ego)
 
     self.LP.parse_model(sm['model'])
 
@@ -116,8 +121,11 @@ class PathPlanner():
       self.lane_change_direction = LaneChangeDirection.none
     else:
       torque_applied = sm['carState'].steeringPressed and \
-                       ((sm['carState'].steeringTorque > 0 and self.lane_change_direction == LaneChangeDirection.left) or \
+                       ((sm['carState'].steeringTorque > 0 and self.lane_change_direction == LaneChangeDirection.left) or
                         (sm['carState'].steeringTorque < 0 and self.lane_change_direction == LaneChangeDirection.right))
+
+      blindspot_detected = ((sm['carState'].leftBlindspot and self.lane_change_direction == LaneChangeDirection.left) or
+                            (sm['carState'].rightBlindspot and self.lane_change_direction == LaneChangeDirection.right))
 
       lane_change_prob = self.LP.l_lane_change_prob + self.LP.r_lane_change_prob
 
@@ -131,13 +139,13 @@ class PathPlanner():
       elif self.lane_change_state == LaneChangeState.preLaneChange:
         if not one_blinker or below_lane_change_speed:
           self.lane_change_state = LaneChangeState.off
-        elif torque_applied:
+        elif torque_applied and not blindspot_detected:
           self.lane_change_state = LaneChangeState.laneChangeStarting
 
       # starting
       elif self.lane_change_state == LaneChangeState.laneChangeStarting:
-        # fade out over .2s
-        self.lane_change_ll_prob = max(self.lane_change_ll_prob - DT_MDL/5, 0.0)
+        # fade out over .5s
+        self.lane_change_ll_prob = max(self.lane_change_ll_prob - 2*DT_MDL, 0.0)
         # 98% certainty
         if lane_change_prob < 0.02 and self.lane_change_ll_prob < 0.01:
           self.lane_change_state = LaneChangeState.laneChangeFinishing
@@ -231,8 +239,6 @@ class PathPlanner():
     plan_send.pathPlan.angleOffset = float(sm['liveParameters'].angleOffsetAverage)
     plan_send.pathPlan.mpcSolutionValid = bool(plan_solution_valid)
     plan_send.pathPlan.paramsValid = bool(sm['liveParameters'].valid)
-    plan_send.pathPlan.sensorValid = bool(sm['liveParameters'].sensorValid)
-    plan_send.pathPlan.posenetValid = bool(sm['liveParameters'].posenetValid)
 
     plan_send.pathPlan.desire = desire
     plan_send.pathPlan.laneChangeState = self.lane_change_state

@@ -29,16 +29,17 @@ const int TOYOTA_STANDSTILL_THRSLD = 100;  // 1kph
 const int TOYOTA_GAS_INTERCEPTOR_THRSLD = 845;
 #define TOYOTA_GET_INTERCEPTOR(msg) (((GET_BYTE((msg), 0) << 8) + GET_BYTE((msg), 1) + (GET_BYTE((msg), 2) << 8) + GET_BYTE((msg), 3)) / 2) // avg between 2 tracks
 
-const AddrBus TOYOTA_TX_MSGS[] = {{0x283, 0}, {0x2E6, 0}, {0x2E7, 0}, {0x33E, 0}, {0x344, 0}, {0x365, 0}, {0x366, 0}, {0x4CB, 0},  // DSU bus 0
-                                  {0x128, 1}, {0x141, 1}, {0x160, 1}, {0x161, 1}, {0x470, 1},  // DSU bus 1
-                                  {0x2E4, 0}, {0x411, 0}, {0x412, 0}, {0x343, 0}, {0x1D2, 0},  // LKAS + ACC
-                                  {0x200, 0}, {0x750, 0}};  // interceptor + Blindspot monitor
+const CanMsg TOYOTA_TX_MSGS[] = {{0x283, 0, 7}, {0x2E6, 0, 8}, {0x2E7, 0, 8}, {0x33E, 0, 7}, {0x344, 0, 8}, {0x365, 0, 7}, {0x366, 0, 7}, {0x4CB, 0, 8},  // DSU bus 0
+                                  {0x128, 1, 6}, {0x141, 1, 4}, {0x160, 1, 8}, {0x161, 1, 7}, {0x470, 1, 4},  // DSU bus 1
+                                  {0x2E4, 0, 5}, {0x411, 0, 8}, {0x412, 0, 8}, {0x343, 0, 8}, {0x1D2, 0, 8},  // LKAS + ACC
+                                  {0x200, 0, 6}};  // interceptor
 
 AddrCheckStruct toyota_rx_checks[] = {
-  {.addr = { 0xaa}, .bus = 0, .check_checksum = false, .expected_timestep = 12000U},
-  {.addr = {0x260}, .bus = 0, .check_checksum = true, .expected_timestep = 20000U},
-  {.addr = {0x1D2}, .bus = 0, .check_checksum = true, .expected_timestep = 30000U},
-  {.addr = {0x224, 0x226}, .bus = 0, .check_checksum = false, .expected_timestep = 25000U},
+  {.msg = {{ 0xaa, 0, 8, .check_checksum = false, .expected_timestep = 12000U}}},
+  {.msg = {{0x260, 0, 8, .check_checksum = true, .expected_timestep = 20000U}}},
+  {.msg = {{0x1D2, 0, 8, .check_checksum = true, .expected_timestep = 30000U}}},
+  {.msg = {{0x224, 0, 8, .check_checksum = false, .expected_timestep = 25000U},
+           {0x226, 0, 8, .check_checksum = false, .expected_timestep = 25000U}}},
 };
 const int TOYOTA_RX_CHECKS_LEN = sizeof(toyota_rx_checks) / sizeof(toyota_rx_checks[0]);
 
@@ -64,7 +65,6 @@ static int toyota_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
 
   bool valid = addr_safety_check(to_push, toyota_rx_checks, TOYOTA_RX_CHECKS_LEN,
                                  toyota_get_checksum, toyota_compute_checksum, NULL);
-  bool unsafe_allow_gas = unsafe_mode & UNSAFE_DISABLE_DISENGAGE_ON_GAS;
 
   if (valid && (GET_BUS(to_push) == 0)) {
     int addr = GET_ADDR(to_push);
@@ -98,12 +98,10 @@ static int toyota_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       }
       cruise_engaged_prev = cruise_engaged;
 
-      // handle gas_pressed
-      bool gas_pressed = ((GET_BYTE(to_push, 0) >> 4) & 1) == 0;
-      if (!unsafe_allow_gas && gas_pressed && !gas_pressed_prev && !gas_interceptor_detected) {
-        controls_allowed = 0;
+      // sample gas pedal
+      if (!gas_interceptor_detected) {
+        gas_pressed = ((GET_BYTE(to_push, 0) >> 4) & 1) == 0;
       }
-      gas_pressed_prev = gas_pressed;
     }
 
     // sample speed
@@ -117,32 +115,23 @@ static int toyota_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       vehicle_moving = ABS(speed / 4) > TOYOTA_STANDSTILL_THRSLD;
     }
 
-    // exit controls on rising edge of brake pedal
     // most cars have brake_pressed on 0x226, corolla and rav4 on 0x224
     if ((addr == 0x224) || (addr == 0x226)) {
       int byte = (addr == 0x224) ? 0 : 4;
-      bool brake_pressed = ((GET_BYTE(to_push, byte) >> 5) & 1) != 0;
-      if (brake_pressed && (!brake_pressed_prev || vehicle_moving)) {
-        controls_allowed = 0;
-      }
-      brake_pressed_prev = brake_pressed;
+      brake_pressed = ((GET_BYTE(to_push, byte) >> 5) & 1) != 0;
     }
 
-    // exit controls on rising edge of interceptor gas press
+    // sample gas interceptor
     if (addr == 0x201) {
       gas_interceptor_detected = 1;
       int gas_interceptor = TOYOTA_GET_INTERCEPTOR(to_push);
-      if (!unsafe_allow_gas && (gas_interceptor > TOYOTA_GAS_INTERCEPTOR_THRSLD) &&
-          (gas_interceptor_prev <= TOYOTA_GAS_INTERCEPTOR_THRSLD)) {
-        controls_allowed = 0;
-      }
+      gas_pressed = gas_interceptor > TOYOTA_GAS_INTERCEPTOR_THRSLD;
+
+      // TODO: remove this, only left in for gas_interceptor_prev test
       gas_interceptor_prev = gas_interceptor;
     }
 
-    // 0x2E4 is lkas cmd. If it is on bus 0, then relay is unexpectedly closed
-    if ((safety_mode_cnt > RELAY_TRNS_TIMEOUT) && (addr == 0x2E4)) {
-      relay_malfunction_set();
-    }
+    generic_rx_checks((addr == 0x2E4));
   }
   return valid;
 }
@@ -153,7 +142,7 @@ static int toyota_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
   int addr = GET_ADDR(to_send);
   int bus = GET_BUS(to_send);
 
-  if (!msg_allowed(addr, bus, TOYOTA_TX_MSGS, sizeof(TOYOTA_TX_MSGS)/sizeof(TOYOTA_TX_MSGS[0]))) {
+  if (!msg_allowed(to_send, TOYOTA_TX_MSGS, sizeof(TOYOTA_TX_MSGS)/sizeof(TOYOTA_TX_MSGS[0]))) {
     tx = 0;
   }
 
@@ -185,7 +174,7 @@ static int toyota_tx_hook(CAN_FIFOMailBox_TypeDef *to_send) {
       bool violation = (unsafe_mode & UNSAFE_RAISE_LONGITUDINAL_LIMITS_TO_ISO_MAX)?
         max_limit_check(desired_accel, TOYOTA_ISO_MAX_ACCEL, TOYOTA_ISO_MIN_ACCEL) :
         max_limit_check(desired_accel, TOYOTA_MAX_ACCEL, TOYOTA_MIN_ACCEL);
-        
+
       if (violation) {
         tx = 0;
       }

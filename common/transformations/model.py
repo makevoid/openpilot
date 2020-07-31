@@ -41,6 +41,17 @@ medmodel_intrinsics = np.array(
    [   0. ,  eon_focal_length / medmodel_zoom,  MEDMODEL_CY],
    [   0. ,                            0. ,   1.]])
 
+# CAL model
+CALMODEL_INPUT_SIZE = (512, 256)
+CALMODEL_YUV_SIZE = (CALMODEL_INPUT_SIZE[0], CALMODEL_INPUT_SIZE[1] * 3 // 2)
+CALMODEL_CY = 47.6
+
+calmodel_zoom = 1.5
+calmodel_intrinsics = np.array(
+  [[ eon_focal_length / calmodel_zoom,    0. ,  0.5 * CALMODEL_INPUT_SIZE[0]],
+   [   0. ,  eon_focal_length / calmodel_zoom,  CALMODEL_CY],
+   [   0. ,                            0. ,   1.]])
+
 
 # BIG model
 
@@ -100,7 +111,7 @@ def get_camera_frame_from_model_frame(camera_frame_from_road_frame, height=model
 
   # This function is super slow, so skip it if height is very close to canonical
   # TODO: speed it up!
-  if abs(height - model_height) > 0.001: #
+  if abs(height - model_height) > 0.001:
     camera_from_model_camera = get_model_height_transform(camera_frame_from_road_frame, height)
   else:
     camera_from_model_camera = np.eye(3)
@@ -130,9 +141,9 @@ def get_camera_frame_from_bigmodel_frame(camera_frame_from_road_frame):
 
 def get_model_frame(snu_full, camera_frame_from_model_frame, size):
   idxs = camera_frame_from_model_frame.dot(np.column_stack([np.tile(np.arange(size[0]), size[1]),
-                                                            np.tile(np.arange(size[1]), (size[0],1)).T.flatten(),
+                                                            np.tile(np.arange(size[1]), (size[0], 1)).T.flatten(),
                                                             np.ones(size[0] * size[1])]).T).T.astype(int)
-  calib_flat = snu_full[idxs[:,1], idxs[:,0]]
+  calib_flat = snu_full[idxs[:, 1], idxs[:, 0]]
   if len(snu_full.shape) == 3:
     calib = calib_flat.reshape((size[1], size[0], 3))
   elif len(snu_full.shape) == 2:

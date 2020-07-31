@@ -1,6 +1,7 @@
 import os
 from common.params import Params
 from common.basedir import BASEDIR
+from selfdrive.version import comma_remote, tested_branch
 from selfdrive.car.fingerprints import eliminate_incompatible_cars, all_known_cars
 from selfdrive.car.vin import get_vin, VIN_UNKNOWN
 from selfdrive.car.fw_versions import get_fw_versions, match_fw_to_car
@@ -8,18 +9,22 @@ from selfdrive.swaglog import cloudlog
 import cereal.messaging as messaging
 from selfdrive.car import gen_empty_fingerprint
 
-from cereal import car
+from cereal import car, log
+EventName = car.CarEvent.EventName
+HwType = log.HealthData.HwType
 
-def get_startup_alert(car_recognized, controller_available):
-  alert = 'startup'
-  if Params().get("GitRemote", encoding="utf8") in ['git@github.com:commaai/openpilot.git', 'https://github.com/commaai/openpilot.git']:
-    if Params().get("GitBranch", encoding="utf8") not in ['devel', 'release2-staging', 'dashcam-staging', 'release2', 'dashcam']:
-      alert = 'startupMaster'
+
+def get_startup_event(car_recognized, controller_available):
+  if comma_remote and tested_branch:
+    event = EventName.startup
+  else:
+    event = EventName.startupMaster
+
   if not car_recognized:
-    alert = 'startupNoCar'
+    event = EventName.startupNoCar
   elif car_recognized and not controller_available:
-    alert = 'startupNoControl'
-  return alert
+    event = EventName.startupNoControl
+  return event
 
 
 def load_interfaces(brand_names):
@@ -72,8 +77,9 @@ def only_toyota_left(candidate_cars):
 # **** for use live only ****
 def fingerprint(logcan, sendcan, has_relay):
   fixed_fingerprint = os.environ.get('FINGERPRINT', "")
+  skip_fw_query = os.environ.get('SKIP_FW_QUERY', False)
 
-  if has_relay and not fixed_fingerprint:
+  if has_relay and not fixed_fingerprint and not skip_fw_query:
     # Vin query only reliably works thorugh OBDII
     bus = 1
 

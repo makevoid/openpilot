@@ -1,6 +1,6 @@
-#ifndef _UI_H
-#define _UI_H
-#include "cereal/gen/cpp/log.capnp.h"
+#pragma once
+#include "messaging.hpp"
+
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #define NANOVG_GL3_IMPLEMENTATION
@@ -11,8 +11,7 @@
 #define NANOVG_GLES3_IMPLEMENTATION
 #define nvgCreate nvgCreateGLES3
 #endif
-
-#include <capnp/serialize.h>
+#include <atomic>
 #include <pthread.h>
 #include "nanovg.h"
 
@@ -21,7 +20,6 @@
 #include "common/visionimg.h"
 #include "common/framebuffer.h"
 #include "common/modeldata.h"
-#include "messaging.hpp"
 #include "sound.hpp"
 
 #define STATUS_STOPPED 0
@@ -90,7 +88,6 @@ const uint8_t bg_colors[][4] = {
   [STATUS_ALERT] = {0xC9, 0x22, 0x31, 0xff},
 };
 
-
 typedef struct UIScene {
   int frontview;
   int fullview;
@@ -105,61 +102,36 @@ typedef struct UIScene {
   bool world_objects_visible;
   mat4 extrinsic_matrix;      // Last row is 0 so we can use mat4.
 
-  float v_cruise;
-  uint64_t v_cruise_update_ts;
-  float v_ego;
-  bool decel_for_model;
-
   float speedlimit;
   bool speedlimit_valid;
+
+  bool is_rhd;
   bool map_valid;
-
-  float curvature;
-  int engaged;
-  bool engageable;
-  bool monitoring_active;
-
   bool uilayout_sidebarcollapsed;
   bool uilayout_mapenabled;
-  bool uilayout_mockengaged;
   // responsive layout
   int ui_viz_rx;
   int ui_viz_rw;
   int ui_viz_ro;
 
-  int lead_status;
-  float lead_d_rel, lead_y_rel, lead_v_rel;
-
-  int lead_status2;
-  float lead_d_rel2, lead_y_rel2, lead_v_rel2;
-
-  float face_prob;
-  bool is_rhd;
-  float face_x, face_y;
-
   int front_box_x, front_box_y, front_box_width, front_box_height;
 
-  uint64_t alert_ts;
   std::string alert_text1;
   std::string alert_text2;
+  std::string alert_type;
   cereal::ControlsState::AlertSize alert_size;
-  float alert_blinkingrate;
-
-  float awareness_status;
 
   // Used to show gps planner status
   bool gps_planner_active;
 
-  cereal::ThermalData::NetworkType networkType;
-  cereal::ThermalData::NetworkStrength networkStrength;
-  int batteryPercent;
-  bool batteryCharging;
-  float freeSpace;
-  cereal::ThermalData::ThermalStatus thermalStatus;
-  int paTemp;
   cereal::HealthData::HwType hwType;
   int satelliteCount;
   uint8_t athenaStatus;
+
+  cereal::ThermalData::Reader thermal;
+  cereal::RadarState::LeadData::Reader lead_data[2];
+  cereal::ControlsState::Reader controls_state;
+  cereal::DriverState::Reader driver_state;
 } UIScene;
 
 typedef struct {
@@ -203,21 +175,8 @@ typedef struct UIState {
   int img_network[6];
 
   // sockets
-  Context *ctx;
-  SubSocket *model_sock;
-  SubSocket *controlsstate_sock;
-  SubSocket *livecalibration_sock;
-  SubSocket *radarstate_sock;
-  SubSocket *map_data_sock;
-  SubSocket *uilayout_sock;
-  SubSocket *thermal_sock;
-  SubSocket *health_sock;
-  SubSocket *ubloxgnss_sock;
-  SubSocket *driverstate_sock;
-  SubSocket *dmonitoring_sock;
-  PubSocket *offroad_sock;
-  Poller * poller;
-  Poller * ublox_poller;
+  SubMaster *sm;
+  PubMaster *pm;
 
   cereal::UiLayoutState::App active_app;
 
@@ -254,16 +213,13 @@ typedef struct UIState {
 
   // timeouts
   int awake_timeout;
-  int volume_timeout;
   int controls_timeout;
-  int alert_sound_timeout;
   int speed_lim_off_timeout;
   int is_metric_timeout;
   int longitudinal_control_timeout;
   int limit_set_speed_timeout;
   int hardware_timeout;
   int last_athena_ping_timeout;
-  int offroad_layout_timeout;
 
   bool controls_seen;
 
@@ -274,21 +230,15 @@ typedef struct UIState {
   bool limit_set_speed;
   float speed_lim_off;
   bool is_ego_over_limit;
-  std::string alert_type;
-  AudibleAlert alert_sound;
   float alert_blinking_alpha;
   bool alert_blinked;
   bool started;
-  bool thermal_started, preview_started;
+  bool preview_started;
   bool vision_seen;
 
-  float light_sensor;
+  std::atomic<float> light_sensor;
 
   int touch_fd;
-
-  // Hints for re-calculations and redrawing
-  bool model_changed;
-  bool livempc_or_radarstate_changed;
 
   GLuint frame_vao[2], frame_vbo[2], frame_ibo[2];
   mat4 rear_frame_mat, front_frame_mat;
@@ -296,6 +246,8 @@ typedef struct UIState {
   model_path_vertices_data model_path_vertices[MODEL_LANE_PATH_CNT * 2];
 
   track_vertices_data track_vertices[2];
+
+  Sound sound;
 } UIState;
 
 // API
@@ -305,7 +257,5 @@ void ui_draw(UIState *s);
 void ui_draw_sidebar(UIState *s);
 void ui_draw_image(NVGcontext *vg, float x, float y, float w, float h, int image, float alpha);
 void ui_draw_rect(NVGcontext *vg, float x, float y, float w, float h, NVGcolor color, float r = 0, int width = 0);
-void ui_draw_rect(NVGcontext *vg, float x, float y, float w, float h, NVGpaint paint, float r = 0);
+void ui_draw_rect(NVGcontext *vg, float x, float y, float w, float h, NVGpaint &paint, float r = 0);
 void ui_nvg_init(UIState *s);
-
-#endif
