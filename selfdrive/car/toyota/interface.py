@@ -313,7 +313,6 @@ class CarInterface(CarInterfaceBase):
 
     ret.canValid = self.cp.can_valid and self.cp_cam.can_valid
     ret.steeringRateLimited = self.CC.steer_rate_limited if self.CC is not None else False
-    ret.buttonEvents = []
 
     # limit min speed to 20mph
     # note: setting min speed, 28mph will result in speed being limited to 20mph, this is to allow city driving, this means that setting 28mph will be not possible anymore, only 29mph or above, if you set 28mph the car will do max 20mph
