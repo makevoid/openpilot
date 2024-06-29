@@ -424,7 +424,11 @@ EVENTS: dict[int, dict[str, Alert | AlertCallbackType]] = {
       "Steering Temporarily Unavailable",
       "",
       AlertStatus.userPrompt, AlertSize.small,
-      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.prompt, 1.8),
+      # edited:
+      # remove sound from silent steer alert
+      Priority.LOW, VisualAlert.steerRequired, AudibleAlert.none, 1.),
+      # original:
+      #Priority.LOW, VisualAlert.steerRequired, AudibleAlert.prompt, 1.),
   },
 
   EventName.preDriverDistracted: {

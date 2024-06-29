@@ -326,7 +326,10 @@ class CarInterfaceBase(ABC):
           self.silent_steer_warning = True
           events.add(EventName.steerTempUnavailableSilent)
         else:
-          events.add(EventName.steerTempUnavailable)
+          # edited: all steer warning events are silent
+          events.add(EventName.steerTempUnavailableSilent)
+          # original:
+          # events.add(EventName.steerTempUnavailable)
     else:
       self.no_steer_warning = False
       self.silent_steer_warning = False

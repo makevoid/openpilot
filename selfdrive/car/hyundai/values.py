@@ -39,6 +39,8 @@ class CarControllerParams:
                                CAR.HYUNDAI_IONIQ_EV_LTD, CAR.HYUNDAI_SANTA_FE_PHEV_2022, CAR.HYUNDAI_SONATA_LF, CAR.KIA_FORTE, CAR.KIA_NIRO_PHEV,
                                CAR.KIA_OPTIMA_H, CAR.KIA_OPTIMA_H_G4_FL, CAR.KIA_SORENTO):
       self.STEER_MAX = 255
+      # NOTE: do I require panda override? I don't remember
+      # self.STEER_MAX = 384
 
     # these cars have significantly more torque than most HKG; limit to 70% of max
     elif CP.flags & HyundaiFlags.ALT_LIMITS:
