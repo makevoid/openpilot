@@ -21,6 +21,9 @@ else:
   CAMERA_OFFSET = 0.0
   PATH_OFFSET = 0.0
 
+# I have the Comma 2 mounted off center on the driver side (LHD)
+CAMERA_OFFSET =  0.14 # works well
+CAMERA_OFFSET =  -0.09 # highway test 1
 
 class LanePlanner:
   def __init__(self, wide_camera=False):
