@@ -76,15 +76,20 @@ class CarState(CarStateBase):
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = ret.wheelSpeeds.fl <= STANDSTILL_THRESHOLD and ret.wheelSpeeds.rr <= STANDSTILL_THRESHOLD
 
-    # CAUTION - use this code as your own risk
+    # CAUTION - use this code as your own risk - this part modifies the default behaviour of the system
     #
-    # prevent deceleration near the non-steering zone
     if ret.aEgo is not None:
-      if ret.aEgo < 0 and ret.aEgo > -0.2:
+      # prevent deceleration near the non-steering zone
+      if -0.4 < ret.aEgo < 0:
         # Check if the speed is in the range of ~46-48 kmh (13-13.5 m/s)
-        if ret.vEgo < 13.5 && ret.vEgo > 13:
-          # do not decelerate, accelerate a tiny bit instead
-          ret.aEgo = 0.02
+        if 12.5 < ret.vEgo < 13.2:
+          # Do not decelerate, accelerate a tiny bit instead (0.04 m/s^2)
+          ret.aEgo = 0.04
+      #
+      # decrease acceleration at very low speed (below ~7 kmh, max at 0.8 m/s^2)
+      if ret.vEgo < 1.8:
+        ret.aEgo = min(ret.aEgo, 0.8)
+
 
     self.cluster_speed_counter += 1
     if self.cluster_speed_counter > CLUSTER_SAMPLE_RATE:
