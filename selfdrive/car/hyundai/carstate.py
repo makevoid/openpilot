@@ -80,11 +80,11 @@ class CarState(CarStateBase):
     #
     if ret.aEgo is not None:
       # prevent deceleration near the non-steering zone
-      if -0.4 < ret.aEgo < 0:
+      if -0.8 < ret.aEgo < 0:
         # Check if the speed is in the range of ~46-48 kmh (13-13.5 m/s)
-        if 12.5 < ret.vEgo < 13.2:
+        if 12.5 < ret.vEgo < 13.5:
           # Do not decelerate, accelerate a tiny bit instead (0.04 m/s^2)
-          ret.aEgo = 0.04
+          ret.aEgo = 0.06
       #
       # decrease acceleration at very low speed (below ~7 kmh, max at 0.08 m/s^2)
       if ret.vEgo < 1.8:
