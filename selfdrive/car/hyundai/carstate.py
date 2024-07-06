@@ -86,9 +86,9 @@ class CarState(CarStateBase):
           # Do not decelerate, accelerate a tiny bit instead (0.04 m/s^2)
           ret.aEgo = 0.04
       #
-      # decrease acceleration at very low speed (below ~7 kmh, max at 0.8 m/s^2)
+      # decrease acceleration at very low speed (below ~7 kmh, max at 0.08 m/s^2)
       if ret.vEgo < 1.8:
-        ret.aEgo = min(ret.aEgo, 0.8)
+        ret.aEgo = min(ret.aEgo, 0.08)
 
 
     self.cluster_speed_counter += 1
