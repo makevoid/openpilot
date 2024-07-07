@@ -170,10 +170,24 @@ class CarController(CarControllerBase):
     new_actuators = actuators.as_builder()
     new_actuators.steer = apply_steer / self.params.STEER_MAX
     new_actuators.steerOutputCan = apply_steer
+
+    # CAUTION - use this code as your own risk - this part modifies the default behaviour of the system
+    #
+    vEgo = CS.out.vEgo
+    if accel is not None:
+      # prevent deceleration near the non-steering zone
+      if -0.8 < accel < 0:
+        # Check if the speed is in the range of ~46-48 kmh (13-13.5 m/s)
+        if 12.5 < vEgo < 13.5:
+          # Do not decelerate, accelerate a tiny bit instead (0.04 m/s^2)
+          accel = 0.06
+      #
+      # decrease acceleration at very low speed (below ~7 kmh, max at 0.08 m/s^2)
+      if vEgo < 1.8:
+        accel = min(accel, 0.08)
+
     new_actuators.accel = accel
 
-    # CAUTION: use this code as your own risk - this part modifies the default behaviour of the system
-    #
     # reduce lateral control when doing lane changes (factor: 3)
     # if self.sm['modelV2'].meta.laneChangeState != LaneChangeState.off:
     #   new_actuators.steer = apply_steer / self.params.STEER_MAX / 3
