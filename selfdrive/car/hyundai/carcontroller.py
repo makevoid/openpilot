@@ -9,7 +9,9 @@ from openpilot.selfdrive.car.hyundai.hyundaicanfd import CanBus
 from openpilot.selfdrive.car.hyundai.values import HyundaiFlags, Buttons, CarControllerParams, CANFD_CAR, CAR
 from openpilot.selfdrive.car.interfaces import CarControllerBase
 
-# import cereal.messaging as messaging
+import cereal.messaging as messaging
+from cereal import log
+LaneChangeState = log.LaneChangeState
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 LongCtrlState = car.CarControl.Actuators.LongControlState
@@ -59,7 +61,7 @@ class CarController(CarControllerBase):
     self.car_fingerprint = CP.carFingerprint
     self.last_button_frame = 0
 
-    # self.sm = messaging.SubMaster(['modelV2'])
+    self.sm = messaging.SubMaster(['modelV2'])
 
   def update(self, CC, CS, now_nanos):
     actuators = CC.actuators
@@ -189,9 +191,9 @@ class CarController(CarControllerBase):
     new_actuators.accel = accel
 
     # reduce lateral control when doing lane changes (factor: 3)
-    # if self.sm['modelV2'].meta.laneChangeState != LaneChangeState.off:
-    #   new_actuators.steer = apply_steer / self.params.STEER_MAX / 3
-    #   new_actuators.steerOutputCan = apply_steer / 3
+    if self.sm['modelV2'].meta.laneChangeState != LaneChangeState.off:
+      new_actuators.steer = apply_steer / self.params.STEER_MAX / 3
+      new_actuators.steerOutputCan = apply_steer / 3
 
     self.frame += 1
     return new_actuators, can_sends
