@@ -176,15 +176,15 @@ class CarController(CarControllerBase):
     vEgo = CS.out.vEgo
     if accel is not None:
       # prevent deceleration near the non-steering zone
-      if -0.8 < accel < 0:
-        # Check if the speed is in the range of ~46-48 kmh (13-13.5 m/s)
+      if -1.2 < accel < 0:
+        # Check if the speed is in the range of ~45-48 kmh (13-13.5 m/s)
         if 12.5 < vEgo < 13.5:
-          # Do not decelerate, accelerate a tiny bit instead (0.04 m/s^2)
+          # Do not decelerate, accelerate a bit instead (0.06 m/s^2)
           accel = 0.06
       #
-      # decrease acceleration at very low speed (below ~7 kmh, max at 0.08 m/s^2)
-      if vEgo < 1.8:
-        accel = min(accel, 0.08)
+      # decrease acceleration at very low speed (below ~10 kmh, max at 0.02 m/s^2)
+      if vEgo < 2:
+        accel = min(accel, 0.02)
 
     new_actuators.accel = accel
 
