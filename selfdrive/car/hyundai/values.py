@@ -125,7 +125,10 @@ class HyundaiPlatformConfig(PlatformConfig):
       self.dbc_dict = dbc_dict('hyundai_kia_generic', 'hyundai_kia_mando_front_radar_generated')
 
     if self.flags & HyundaiFlags.MIN_STEER_32_MPH:
-      self.specs = self.specs.override(minSteerSpeed=32 * CV.MPH_TO_MS)
+      # self.specs = self.specs.override(minSteerSpeed=32 * CV.MPH_TO_MS)
+      #
+      # NOTE: This Branch is to support a car with SMDPS installed - this is the only change required for SMDPS
+      self.specs = self.specs.override(minSteerSpeed=0)
 
 
 @dataclass
