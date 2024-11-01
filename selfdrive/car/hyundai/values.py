@@ -128,7 +128,7 @@ class HyundaiPlatformConfig(PlatformConfig):
       # self.specs = self.specs.override(minSteerSpeed=32 * CV.MPH_TO_MS)
       #
       # NOTE: This Branch is to support a car with SMDPS installed - this is the only change required for SMDPS
-      self.specs = self.specs.override(minSteerSpeed=0)
+      self.specs = self.specs.override(minSteerSpeed=1 * CV.MPH_TO_MS)
 
 
 @dataclass
@@ -201,7 +201,8 @@ class CAR(Platforms):
     CarSpecs(
       mass=1490, wheelbase=2.7, steerRatio=13.73, tireStiffnessFactor=0.385,
       # trying different minSteerSpeed - it seems that 46kmh is the effective one applied
-      minSteerSpeed=28 * CV.MPH_TO_MS,
+      minSteerSpeed=0,
+      #minSteerSpeed=28 * CV.MPH_TO_MS,
       #minSteerSpeed=29 * CV.MPH_TO_MS,
     ),
     flags=HyundaiFlags.HYBRID,
