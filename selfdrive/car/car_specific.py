@@ -224,7 +224,7 @@ class CarSpecificEvents:
           self.silent_steer_warning = True
           events.add(EventName.steerTempUnavailableSilent)
         else:
-          events.add(EventName.steerTempUnavailable)
+          events.add(EventName.steerTempUnavailableSilent)
     else:
       self.no_steer_warning = False
       self.silent_steer_warning = False
